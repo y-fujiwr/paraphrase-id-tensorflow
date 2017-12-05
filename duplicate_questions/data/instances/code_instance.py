@@ -136,7 +136,9 @@ class CodeInstance(TextInstance):
             label = float(sim_token)
         elif len(fields) == 5:
             # test set instance
-            _, first_sentence, second_sentence, _, _ = fields
+            _, first_func_id, second_func_id, sim_line, sim_token = fields
+            first_sentence = CodeInstance.read_tokens(first_func_id)
+            second_sentence = CodeInstance.read_tokens(second_func_id)
             label = None
         else:
             raise RuntimeError("Unrecognized line format: " + line)
