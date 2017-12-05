@@ -163,6 +163,8 @@ def main():
     batch_size = config.batch_size
     if mode == "train":
         # Read the train data from a file, and use it to index the validation data
+
+        # TODO: determine from config
         # data_manager = DataManager(STSInstance)
         data_manager = DataManager(CodeInstance)
         num_sentence_words = config.num_sentence_words

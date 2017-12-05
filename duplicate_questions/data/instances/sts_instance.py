@@ -84,7 +84,8 @@ class STSInstance(TextInstance):
 
         return IndexedSTSInstance(indexed_first_sentence,
                                   indexed_second_sentence,
-                                  self.label_mapping[self.label])
+                                  # self.label_mapping[self.label])
+                                  [self.label])
 
     @classmethod
     def read_from_line(cls, line):
