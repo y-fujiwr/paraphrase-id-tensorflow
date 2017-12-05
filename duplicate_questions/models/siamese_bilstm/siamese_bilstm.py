@@ -108,7 +108,8 @@ class SiameseBiLSTM(BaseTFModel):
         # The true labels, encoded as a one-hot vector. So
         # [1, 0] indicates not duplicate, [0, 1] indicates duplicate.
         self.y_true = tf.placeholder("int32",
-                                     [None, 2],
+                                     # [None, 2],
+                                     [None, 1],
                                      name="true_labels")
 
         # A boolean that encodes whether we are training or evaluating

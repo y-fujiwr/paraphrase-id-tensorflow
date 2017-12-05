@@ -12,12 +12,14 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../../"))
 from duplicate_questions.data.data_manager import DataManager
 from duplicate_questions.data.embedding_manager import EmbeddingManager
 from duplicate_questions.data.instances.sts_instance import STSInstance
+from duplicate_questions.data.instances.code_instance import CodeInstance
 from duplicate_questions.models.siamese_bilstm.siamese_bilstm import SiameseBiLSTM
 
 logger = logging.getLogger(__name__)
 
 
 def main():
+    default_run_id = "01"
     project_dir = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)
 
     # Parse config arguments
@@ -35,19 +37,31 @@ def main():
                            help=("The path to a directory with checkpoints to "
                                  "load for evaluation or prediction. The "
                                  "latest checkpoint will be loaded."))
+    argparser.add_argument("--config_file", type=str,
+                           help="The path to a config file.")
     argparser.add_argument("--dataindexer_load_path", type=str,
                            help=("The path to the dataindexer fit on the "
                                  "train data, so we can properly index the "
                                  "test data for evaluation or prediction."))
+    # argparser.add_argument("--train_file", type=str,
+    #                        default=os.path.join(project_dir,
+    #                                             "data/processed/quora/"
+    #                                             "train_cleaned_train_split.csv"),
+    #                        help="Path to a file to train on.")
     argparser.add_argument("--train_file", type=str,
                            default=os.path.join(project_dir,
-                                                "data/processed/quora/"
-                                                "train_cleaned_train_split.csv"),
+                                                "data/processed/bcb/"
+                                                "train_train_split.csv"),
                            help="Path to a file to train on.")
+    # argparser.add_argument("--val_file", type=str,
+    #                        default=os.path.join(project_dir,
+    #                                             "data/processed/quora/"
+    #                                             "train_cleaned_val_split.csv"),
+    #                        help="Path to a file to monitor validation acc. on.")
     argparser.add_argument("--val_file", type=str,
                            default=os.path.join(project_dir,
-                                                "data/processed/quora/"
-                                                "train_cleaned_val_split.csv"),
+                                                "data/processed/bcb/"
+                                                "train_val_split.csv"),
                            help="Path to a file to monitor validation acc. on.")
     argparser.add_argument("--test_file", type=str,
                            default=os.path.join(project_dir,
@@ -66,13 +80,18 @@ def main():
                            help=("The maximum length of a sentence. Longer "
                                  "sentences will be truncated, and shorter "
                                  "ones will be padded."))
-    argparser.add_argument("--word_embedding_dim", type=int, default=300,
+    argparser.add_argument("--word_embedding_dim", type=int, default=8,
                            help="Dimensionality of the word embedding layer")
+    # argparser.add_argument("--pretrained_embeddings_file_path", type=str,
+    #                        help="Path to a file with pretrained embeddings.",
+    #                        default=os.path.join(project_dir,
+    #                                             "data/external/",
+    #                                             "glove.6B.300d.txt"))
     argparser.add_argument("--pretrained_embeddings_file_path", type=str,
                            help="Path to a file with pretrained embeddings.",
                            default=os.path.join(project_dir,
-                                                "data/external/",
-                                                "glove.6B.300d.txt"))
+                                                "data/external/bcb",
+                                                "embeddings.txt"))
     argparser.add_argument("--fine_tune_embeddings", action="store_true",
                            help=("Whether to train the embedding layer "
                                  "(if True), or keep it fixed (False)."))
@@ -111,11 +130,11 @@ def main():
                            default=os.path.join(project_dir,
                                                 "models/"),
                            help=("Directory to save model checkpoints to."))
-    argparser.add_argument("--run_id", type=str, required=True,
+    argparser.add_argument("--run_id", type=str, default=default_run_id,
                            help=("Identifying run ID for this run. If "
                                  "predicting, you probably want this "
                                  "to be the same as the train run_id"))
-    argparser.add_argument("--model_name", type=str, required=True,
+    argparser.add_argument("--model_name", type=str,
                            help=("Identifying model name for this run. If"
                                  "predicting, you probably want this "
                                  "to be the same as the train run_id"))
@@ -127,6 +146,15 @@ def main():
 
     config = argparser.parse_args()
 
+    config_file = config.config_file
+
+    if os.path.exists(config_file):
+        with open(config_file) as f:
+            config_from_file = json.load(f)
+            for k, v in config_from_file.items():
+                setattr(config, k, v)
+
+
     model_name = config.model_name
     run_id = config.run_id
     mode = config.mode
@@ -135,7 +163,8 @@ def main():
     batch_size = config.batch_size
     if mode == "train":
         # Read the train data from a file, and use it to index the validation data
-        data_manager = DataManager(STSInstance)
+        # data_manager = DataManager(STSInstance)
+        data_manager = DataManager(CodeInstance)
         num_sentence_words = config.num_sentence_words
         get_train_data_gen, train_data_size = data_manager.get_train_data_from_file(
             [config.train_file],
