@@ -38,8 +38,8 @@ class CodeInstance(TextInstance):
 
     def __init__(self, first_sentence, second_sentence, label):
         super(CodeInstance, self).__init__(label)
-        self.first_sentence_str = first_sentence
-        self.second_sentence_str = second_sentence
+        # self.first_sentence_str = first_sentence
+        # self.second_sentence_str = second_sentence
         # Tokenize the string representations of the first
         # and second sentence into words and characters
 
@@ -55,8 +55,9 @@ class CodeInstance(TextInstance):
             "characters": list(map(list, second_sentence_words))}
 
     def __str__(self):
-        return ('CodeInstance(' + self.first_sentence_str + ', ' +
-                self.second_sentence_str + ', ' + str(self.label) + ')')
+        return ""
+        # return ('CodeInstance(' + self.first_sentence_str + ', ' +
+        #         self.second_sentence_str + ', ' + str(self.label) + ')')
 
     @overrides
     def words(self):
