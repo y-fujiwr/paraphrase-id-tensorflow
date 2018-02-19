@@ -8,8 +8,8 @@ from overrides import overrides
 from .instance import TextInstance, IndexedInstance
 from .instance_word import IndexedInstanceWord
 
-token_file_dir = '/home/wuyuhao/dataset/bigclonebench/files/dataset/functions/'
-# token_file_dir = '/home/wuyuhao/dataset/bigclonebench/files/dataset/test/'
+# token_file_dir = r'D:\MyProjects\Python\dnn-clone-detection\paraphrase-id-tensorflow\data\external\bcb\functions\\'
+token_file_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), r"..\..\..\data\external\bcb\functions\\")
 file_ext = '.java.java.2_0_0_0.default.ccfxprep'
 
 class CodeInstance(TextInstance):
