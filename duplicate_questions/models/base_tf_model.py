@@ -225,6 +225,8 @@ class BaseTFModel:
 
                 epoch_validation_losses.append(val_loss)
 
+                logger.info("Epoch: {epoch}. Validation loss is: {loss}".format(epoch=epoch, loss=val_loss))
+
                 # Get the lowest validation loss, with regards to the patience
                 # threshold.
                 patience_val_losses = epoch_validation_losses[:-(patience + 1)]
