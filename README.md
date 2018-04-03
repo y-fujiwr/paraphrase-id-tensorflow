@@ -59,66 +59,24 @@ pip install tensorflow-gpu
 
 ## Getting / Processing The Data
 
-To begin, run the following to generate the auxiliary directories for storing
-data, trained models, and logs:
+Download the data file:
+https://drive.google.com/file/d/1PqZkAPrBH6ZEPww6WOnZUxF55G83eeZH/view?usp=sharing
 
-```
-make aux_dirs
-```
-
-In addition, if you want to use pretrained GloVe vectors, run:
-
-```
-make glove
-```
-
-which will download pretrained Glove vectors to `data/external/`. Extract the
-files in that same directory.
-
-### Quora Question Pairs
-
-To use the Quora Question Pairs data, download the dataset from
-[Kaggle](https://www.kaggle.com/c/quora-question-pairs) (may require an
-account). Place the downloaded zip archives in `data/raw/`, and extract the
-files to that same directory.
-
-Then, run:
-
-```
-make quora_data
-```
-
-to automatically clean and process the data with the scripts in
-`scripts/data/quora`.
+Unzip it to the root of the project.
 
 ## Running models
 
-To train a model or load + predict with a model, then run the scripts in
-`scripts/run_model/` with `python <script_path>`. You can get additional
-documentation about the parameters they take by running `python <script_path>
--h`
-
-Here's an example run command for the baseline Siamese BiLSTM:
+Run the following command to train the model.
 
 ```
-python scripts/run_model/run_siamese.py train --share_encoder_weights --model_name=baseline_siamese --run_id=0
+python scripts/run_model/run_siamese.py train --config_file=../../config/02_bcb_strong.json
 ```
 
-Here's an example run command for the Siamese BiLSTM with matching layer:
+Run the following command to perform the prediction.
 
 ```
-python scripts/run_model/run_siamese_matching_bilstm.py train --share_encoder_weights --model_name=siamese_matching --run_id=0
+python scripts/run_model/run_siamese.py predict --config_file=../../config/02_bcb_strong.json
 ```
-
-
-Here's an example run command for the BiMPM model:
-
-```
-python scripts/run_model/run_bimpm.py train --early_stopping_patience=5 --model_name=biMPM --run_id=0
-```
-
-Note that the defaults might not be ideal for your use, so feel free to turn the
-knobs however you like.
 
 ## Contributors
 

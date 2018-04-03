@@ -11,6 +11,7 @@ from .instance_word import IndexedInstanceWord
 import logging
 logger = logging.getLogger(__name__)
 
+# token_file_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), r"..\..\..\data\external\bcb\functions\\")
 token_file_dir = '/home/wuyuhao/dataset/bigclonebench/files/dataset/merged_functions/'
 # token_file_dir = '/home/wuyuhao/dataset/bigclonebench/files/dataset/test/'
 file_ext = '.java.java.2_0_0_0.default.ccfxprep'
