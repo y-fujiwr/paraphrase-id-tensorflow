@@ -8,7 +8,10 @@ from overrides import overrides
 from .instance import TextInstance, IndexedInstance
 from .instance_word import IndexedInstanceWord
 
-token_file_dir = '/home/wuyuhao/dataset/bigclonebench/files/dataset/functions/'
+import logging
+logger = logging.getLogger(__name__)
+
+token_file_dir = '/home/wuyuhao/dataset/bigclonebench/files/dataset/merged_functions/'
 # token_file_dir = '/home/wuyuhao/dataset/bigclonebench/files/dataset/test/'
 file_ext = '.java.java.2_0_0_0.default.ccfxprep'
 
@@ -90,8 +93,8 @@ class CodeInstance(TextInstance):
 
         return IndexedCodeInstance(indexed_first_sentence,
                                   indexed_second_sentence,
-                                   # self.label_mapping[self.label])
-                                   [self.label])
+                                   self.label_mapping[self.label])
+                                   # [self.label])
 
     @staticmethod
     def read_tokens(func_id):
@@ -99,13 +102,16 @@ class CodeInstance(TextInstance):
         if len(func_id) < 1:
             return []
 
-        sub_dir = func_id[0]
+        # sub_dir = func_id[0]
+        sub_dir = ""
         file_path = os.path.join(token_file_dir, sub_dir, func_id + file_ext)
-        tokens = []
+
+        tokens = ""
         if os.path.exists(file_path):
             with open(file_path) as f:
                 tokens = f.read()
-
+        else:
+            logger.warning("Cannot load file: "+file_path)
         return tokens
 
 
@@ -129,15 +135,15 @@ class CodeInstance(TextInstance):
             An instance constructed from the data in the line of the dataset.
         """
         fields = list(csv.reader([line]))[0]
-        if len(fields) == 4:
+        if len(fields) == 3:
             # training set instance
-            first_func_id, second_func_id, sim_line, sim_token = fields
+            first_func_id, second_func_id, label = fields
             first_sentence = CodeInstance.read_tokens(first_func_id)
             second_sentence = CodeInstance.read_tokens(second_func_id)
-            label = float(sim_token)
-        elif len(fields) == 5:
+            label = int(label)
+        elif len(fields) == 2:
             # test set instance
-            _, first_func_id, second_func_id, sim_line, sim_token = fields
+            first_func_id, second_func_id = fields
             first_sentence = CodeInstance.read_tokens(first_func_id)
             second_sentence = CodeInstance.read_tokens(second_func_id)
             label = None

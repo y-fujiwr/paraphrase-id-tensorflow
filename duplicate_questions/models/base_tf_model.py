@@ -223,6 +223,8 @@ class BaseTFModel:
                     session=sess)
                 val_writer.add_summary(val_summary, global_step)
 
+                logger.info("Validation loss of epoch {} is: {}".format(epoch, val_loss))
+
                 epoch_validation_losses.append(val_loss)
 
                 # Get the lowest validation loss, with regards to the patience
