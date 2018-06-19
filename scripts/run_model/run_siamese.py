@@ -33,40 +33,28 @@ def main():
                                  "If you pick \"predict\", then you must also "
                                  "supply the path to a pretrained model and "
                                  "DataIndexer to load."))
-    argparser.add_argument("--model_load_dir", type=str,
-                           help=("The path to a directory with checkpoints to "
-                                 "load for evaluation or prediction. The "
-                                 "latest checkpoint will be loaded."))
     argparser.add_argument("--config_file", type=str,
                            help="The path to a config file.")
-    argparser.add_argument("--dataindexer_load_path", type=str,
-                           help=("The path to the dataindexer fit on the "
-                                 "train data, so we can properly index the "
-                                 "test data for evaluation or prediction."))
-    # argparser.add_argument("--train_file", type=str,
-    #                        default=os.path.join(project_dir,
-    #                                             "data/processed/quora/"
-    #                                             "train_cleaned_train_split.csv"),
-    #                        help="Path to a file to train on.")
+    # argparser.add_argument("--model_load_dir", type=str,
+    #                        help=("The path to a directory with checkpoints to "
+    #                              "load for evaluation or prediction. The "
+    #                              "latest checkpoint will be loaded."))
+    # argparser.add_argument("--dataindexer_load_path", type=str,
+    #                        help=("The path to the dataindexer fit on the "
+    #                              "train data, so we can properly index the "
+    #                              "test data for evaluation or prediction."))
+    argparser.add_argument("--data_file_dir", type=str,
+                           default=os.path.join(project_dir,
+                                                "data/processed/"),
+                           help="Path of the dir to the (train, val, test).csv files.")
     argparser.add_argument("--train_file", type=str,
-                           default=os.path.join(project_dir,
-                                                "data/processed/bcb/"
-                                                "train_train_split.csv"),
+                           default=os.path.join(project_dir, "train.csv"),
                            help="Path to a file to train on.")
-    # argparser.add_argument("--val_file", type=str,
-    #                        default=os.path.join(project_dir,
-    #                                             "data/processed/quora/"
-    #                                             "train_cleaned_val_split.csv"),
-    #                        help="Path to a file to monitor validation acc. on.")
     argparser.add_argument("--val_file", type=str,
-                           default=os.path.join(project_dir,
-                                                "data/processed/bcb/"
-                                                "train_val_split.csv"),
+                           default=os.path.join(project_dir, "train.csv"),
                            help="Path to a file to monitor validation acc. on.")
     argparser.add_argument("--test_file", type=str,
-                           default=os.path.join(project_dir,
-                                                "data/processed/quora/"
-                                                "test_final.csv"))
+                           default=os.path.join(project_dir, "test.csv"))
     argparser.add_argument("--batch_size", type=int, default=128,
                            help="Number of instances per batch.")
     argparser.add_argument("--num_epochs", type=int, default=10,
@@ -156,11 +144,21 @@ def main():
 
 
     model_name = config.model_name
-    run_id = config.run_id
+    run_id = config.run_id.zfill(2)
     mode = config.mode
 
     # Get the data.
     batch_size = config.batch_size
+    model_save_dir = os.path.join(config.save_dir, model_name, run_id + "/")
+
+    data_manager_pickle_file = os.path.join(model_save_dir,
+                                            "{}-{}-DataManager.pkl".format(model_name,
+                                                                           run_id))
+
+    train_file = os.path.join(config.data_file_dir, config.train_file)
+    val_file = os.path.join(config.data_file_dir, config.val_file)
+    test_file = os.path.join(config.data_file_dir, config.test_file)
+
     if mode == "train":
         # Read the train data from a file, and use it to index the validation data
 
@@ -169,23 +167,23 @@ def main():
         data_manager = DataManager(CodeInstance)
         num_sentence_words = config.num_sentence_words
         get_train_data_gen, train_data_size = data_manager.get_train_data_from_file(
-            [config.train_file],
+            [train_file],
             max_lengths={"num_sentence_words": num_sentence_words})
         get_val_data_gen, val_data_size = data_manager.get_validation_data_from_file(
-            [config.val_file], max_lengths={"num_sentence_words": num_sentence_words})
+            [val_file], max_lengths={"num_sentence_words": num_sentence_words})
     else:
         # Load the fitted DataManager, and use it to index the test data
         logger.info("Loading pickled DataManager "
-                    "from {}".format(config.dataindexer_load_path))
-        data_manager = pickle.load(open(config.dataindexer_load_path, "rb"))
+                    "from {}".format(data_manager_pickle_file))
+        data_manager = pickle.load(open(data_manager_pickle_file, "rb"))
         test_data_gen, test_data_size = data_manager.get_test_data_from_file(
-            [config.test_file])
+            [test_file])
 
     vars(config)["word_vocab_size"] = data_manager.data_indexer.get_vocab_size()
 
     # Log the run parameters.
     log_dir = config.log_dir
-    log_path = os.path.join(log_dir, model_name, run_id.zfill(2))
+    log_path = os.path.join(log_dir, model_name, run_id)
     logger.info("Writing logs to {}".format(log_path))
     if not os.path.exists(log_path):
         logger.info("log path {} does not exist, "
@@ -216,20 +214,16 @@ def main():
         val_period = config.val_period
 
         save_period = config.save_period
-        save_dir = os.path.join(config.save_dir, model_name, run_id.zfill(2) + "/")
-        save_path = os.path.join(save_dir, model_name + "-" + run_id.zfill(2))
+        model_save_path = os.path.join(model_save_dir, model_name + "-" + run_id)
 
-        logger.info("Checkpoints will be written to {}".format(save_dir))
-        if not os.path.exists(save_dir):
+        logger.info("Checkpoints will be written to {}".format(model_save_dir))
+        if not os.path.exists(model_save_dir):
             logger.info("save path {} does not exist, "
-                        "creating it".format(save_dir))
-            os.makedirs(save_dir)
+                        "creating it".format(model_save_dir))
+            os.makedirs(model_save_dir)
 
-        logger.info("Saving fitted DataManager to {}".format(save_dir))
-        data_manager_pickle_name = "{}-{}-DataManager.pkl".format(model_name,
-                                                                  run_id.zfill(2))
-        pickle.dump(data_manager,
-                    open(os.path.join(save_dir, data_manager_pickle_name), "wb"))
+        logger.info("Saving fitted DataManager to {}".format(model_save_dir))
+        pickle.dump(data_manager, open(data_manager_pickle_file, "wb"))
 
         patience = config.early_stopping_patience
         model.train(get_train_instance_generator=get_train_data_gen,
@@ -238,7 +232,7 @@ def main():
                     num_train_steps_per_epoch=num_train_steps_per_epoch,
                     num_epochs=num_epochs,
                     num_val_steps=num_val_steps,
-                    save_path=save_path,
+                    save_path=model_save_path,
                     log_path=log_path,
                     log_period=log_period,
                     val_period=val_period,
@@ -246,11 +240,10 @@ def main():
                     patience=patience)
     else:
         # Predict with the model
-        model_load_dir = config.model_load_dir
         num_test_steps = int(math.ceil(test_data_size / batch_size))
         # Numpy array of shape (num_test_examples, 2)
         raw_predictions = model.predict(get_test_instance_generator=test_data_gen,
-                                        model_load_dir=model_load_dir,
+                                        model_load_dir=model_save_dir,
                                         batch_size=batch_size,
                                         num_test_steps=num_test_steps)
         # Remove the first column, so we're left with just the probabilities
@@ -269,13 +262,12 @@ def main():
                                            (1 - is_duplicate_probabilities)))
 
         # Write the predictions to an output submission file
-        output_predictions_path = os.path.join(log_path, model_name + "-" +
-                                               run_id.zfill(2) +
-                                               "-output_predictions.csv")
+        output_predictions_path = test_file + ".output_predictions.csv"
         logger.info("Writing predictions to {}".format(output_predictions_path))
         is_duplicate_df = pd.DataFrame(is_duplicate_probabilities)
-        is_duplicate_df.to_csv(output_predictions_path, index_label="test_id",
-                               header=["is_duplicate"])
+        # is_duplicate_df.to_csv(output_predictions_path, index_label="test_id",
+        #                        header=["is_duplicate"])
+        is_duplicate_df.to_csv(output_predictions_path, index=False, header=False)
 
 
 if __name__ == "__main__":
