@@ -14,7 +14,8 @@ overrides
 nltk
 
 # Argument parsing / config
-argparse
+#argparse
+ConfigArgParse
 
 # Mainly used for outputting proper csvs easily
 pandas
