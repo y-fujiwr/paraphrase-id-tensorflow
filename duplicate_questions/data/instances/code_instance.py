@@ -136,9 +136,9 @@ class CodeInstance(TextInstance):
             An instance constructed from the data in the line of the dataset.
         """
         fields = list(csv.reader([line]))[0]
-        if len(fields) == 3:
+        if len(fields) >= 3:
             # training set instance
-            first_func_id, second_func_id, label = fields
+            first_func_id, second_func_id, label = fields[0:3]
             first_sentence = CodeInstance.read_tokens(first_func_id)
             second_sentence = CodeInstance.read_tokens(second_func_id)
             label = int(label)

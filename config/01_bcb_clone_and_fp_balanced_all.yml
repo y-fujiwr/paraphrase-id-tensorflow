@@ -1,9 +1,8 @@
 run_id: 01
 model_name: clone_and_false_positives
-data_file_dir: ../../data/processed/bcb/clone_and_false_positives/balanced/minimum-balanced/
-train_file: train.csv
-val_file: val.csv
-test_file: main.csv
+train_filename: train.csv
+val_filename: val.csv
+test_filename: main.csv
 model_save_root: ../../models/
 batch_size: 128
 early_stopping_patience: 10
@@ -13,7 +12,7 @@ reweight_predictions_for_kaggle: false
 save_period: 250
 rnn_hidden_size: 256
 share_encoder_weights: true
-num_epochs: 1
+num_epochs: 8
 output_keep_prob: 1
 val_period: 250
 fine_tune_embeddings: false

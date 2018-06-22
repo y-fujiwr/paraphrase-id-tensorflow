@@ -48,14 +48,15 @@ def main():
                            default=os.path.join(project_dir,
                                                 "data/processed/"),
                            help="Path of the dir to the (train, val, test).csv files.")
-    argparser.add_argument("--train_file", type=str,
+    argparser.add_argument("--train_filename", type=str,
                            default=os.path.join("train.csv"),
-                           help="Path to a file to train on.")
-    argparser.add_argument("--val_file", type=str,
+                           help="Basename of the train file.")
+    argparser.add_argument("--val_filename", type=str,
                            default=os.path.join("train.csv"),
-                           help="Path to a file to monitor validation acc. on.")
-    argparser.add_argument("--test_file", type=str,
-                           default=os.path.join("test.csv"))
+                           help="Basename of the validation file.")
+    argparser.add_argument("--test_filename", type=str,
+                           default=os.path.join("test.csv"),
+                           help="Basename of the test file.")
     argparser.add_argument("--batch_size", type=int, default=128,
                            help="Number of instances per batch.")
     argparser.add_argument("--num_epochs", type=int, default=10,
@@ -141,11 +142,12 @@ def main():
     mode = config.mode
     batch_size = config.batch_size
 
-    paths = construct_paths(model_name, run_id, config.data_file_dir, config.train_file,
-                            config.val_file, config.test_file, config.model_save_root,
+    paths = construct_paths(model_name, run_id, config.data_file_dir, config.train_filename,
+                            config.val_filename, config.test_filename, config.model_save_root,
                             config.log_dir)
-    model_save_path = paths['model_save_path']
+    model_save_file_path = paths['model_save_file_path']
     model_save_dir = paths['model_save_dir']
+    data_manager_pickle_file_path = paths['data_manager_pickle_file_path']
 
     if mode == "train":
         # Read the train data from a file, and use it to index the validation data
@@ -155,22 +157,22 @@ def main():
         data_manager = DataManager(CodeInstance)
         num_sentence_words = config.num_sentence_words
         get_train_data_gen, train_data_size = data_manager.get_train_data_from_file(
-            [paths['train_file']],
+            [paths['train_file_path']],
             max_lengths={"num_sentence_words": num_sentence_words})
         get_val_data_gen, val_data_size = data_manager.get_validation_data_from_file(
-            [paths['val_file']], max_lengths={"num_sentence_words": num_sentence_words})
+            [paths['val_file_path']], max_lengths={"num_sentence_words": num_sentence_words})
     else:
         # Load the fitted DataManager, and use it to index the test data
         logger.info("Loading pickled DataManager "
-                    "from {}".format(paths['data_manager_pickle_file']))
-        data_manager = pickle.load(open(paths['data_manager_pickle_file'], "rb"))
+                    "from {}".format(data_manager_pickle_file_path))
+        data_manager = pickle.load(open(data_manager_pickle_file_path, "rb"))
         test_data_gen, test_data_size = data_manager.get_test_data_from_file(
-            [paths['test_file']])
+            [paths['test_file_path']])
 
     vars(config)["word_vocab_size"] = data_manager.data_indexer.get_vocab_size()
 
     # Log the run parameters.
-    log_path = paths['log_path']
+    log_path = paths['log_file_path']
     logger.info("Writing logs to {}".format(log_path))
     if not os.path.exists(log_path):
         logger.info("log path {} does not exist, "
@@ -202,7 +204,6 @@ def main():
         val_period = config.val_period
 
         save_period = config.save_period
-        # model_save_path = os.path.join(model_save_dir, model_name + "-" + run_id)
 
         logger.info("Checkpoints will be written to {}".format(model_save_dir))
         if not os.path.exists(model_save_dir):
@@ -211,7 +212,7 @@ def main():
             os.makedirs(model_save_dir)
 
         logger.info("Saving fitted DataManager to {}".format(model_save_dir))
-        pickle.dump(data_manager, open(paths['data_manager_pickle_file'], "wb"))
+        pickle.dump(data_manager, open(data_manager_pickle_file_path, "wb"))
 
         patience = config.early_stopping_patience
         model.train(get_train_instance_generator=get_train_data_gen,
@@ -220,7 +221,7 @@ def main():
                     num_train_steps_per_epoch=num_train_steps_per_epoch,
                     num_epochs=num_epochs,
                     num_val_steps=num_val_steps,
-                    save_path=model_save_path,
+                    save_path=model_save_file_path,
                     log_path=log_path,
                     log_period=log_period,
                     val_period=val_period,
@@ -250,47 +251,46 @@ def main():
                                            (1 - is_duplicate_probabilities)))
 
         # Write the predictions to an output submission file
-        output_predictions_path = paths['output_predictions_path']
-        logger.info("Writing predictions to {}".format(output_predictions_path))
+        predictions_file_path = paths['predictions_file_path']
+        logger.info("Writing predictions to {}".format(predictions_file_path))
         is_duplicate_df = pd.DataFrame(is_duplicate_probabilities)
-        # is_duplicate_df.to_csv(output_predictions_path, index_label="test_id",
+        # is_duplicate_df.to_csv(predictions_file_path, index_label="test_id",
         #                        header=["is_duplicate"])
-        is_duplicate_df.to_csv(output_predictions_path, index=False, header=False)
+        is_duplicate_df.to_csv(predictions_file_path, index=False, header=False)
 
 
-def construct_paths(model_name, run_id, data_file_dir, train_file='train.csv',
-                    val_file='val.csv', test_file='test.csv', model_save_root='../../models/',
+def construct_paths(model_name, run_id, data_file_dir, train_filename='train.csv',
+                    val_filename='val.csv', test_filename='test.csv', model_save_root='../../models/',
                     log_dir='../../logs/'):
-
     model_save_dir = os.path.join(model_save_root, model_name, run_id + "/")
 
-    data_manager_pickle_file = os.path.join(model_save_dir,
-                                            "{}-{}-DataManager.pkl".format(model_name,
-                                                                           run_id))
+    data_manager_pickle_file_path = os.path.join(model_save_dir,
+                                                 "{}-{}-DataManager.pkl".format(model_name,
+                                                                                run_id))
 
-    train_file = os.path.join(data_file_dir, train_file)
-    val_file = os.path.join(data_file_dir, val_file)
-    test_file = os.path.join(data_file_dir, test_file)
+    train_file_path = os.path.join(data_file_dir, train_filename)
+    val_file_path = os.path.join(data_file_dir, val_filename)
+    test_file_path = os.path.join(data_file_dir, test_filename)
 
-    log_path = os.path.join(log_dir, model_name, run_id)
+    log_file_path = os.path.join(log_dir, model_name, run_id)
 
-    output_predictions_path = test_file + ".output_predictions.csv"
-    model_save_path = os.path.join(model_save_dir, model_name + "-" + run_id)
+    predictions_file_path = test_file_path + ".output_predictions.csv"
+    model_save_file_path = os.path.join(model_save_dir, model_name + "-" + run_id)
     paths = {
         "model_save_dir": model_save_dir,
-        "data_manager_pickle_file": data_manager_pickle_file,
-        "train_file": train_file,
-        "val_file": val_file,
-        "test_file": test_file,
-        "output_predictions_path": output_predictions_path,
-        "model_save_path": model_save_path,
-        "log_path": log_path,
+        "data_manager_pickle_file_path": data_manager_pickle_file_path,
+        "train_file_path": train_file_path,
+        "val_file_path": val_file_path,
+        "test_file_path": test_file_path,
+        "predictions_file_path": predictions_file_path,
+        "model_save_file_path": model_save_file_path,
+        "log_file_path": log_file_path,
     }
     return paths
 
 
 if __name__ == "__main__":
     logging.basicConfig(format="%(asctime)s - %(levelname)s "
-                        "- %(name)s - %(message)s",
+                               "- %(name)s - %(message)s",
                         level=logging.INFO)
     main()
