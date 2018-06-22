@@ -33,8 +33,12 @@ def main(threshold=0.5):
 
             paths = construct_paths(model_name, run_id, data_file_dir, test_file=test_file)
 
-            # Train the model
-            run_script("train", run_id, data_file_dir, test_file)
+            is_model_trained = os.path.exists(paths['data_manager_pickle_file'])
+
+            # If the model is not trained yet.
+            if not is_model_trained:
+                # Train the model
+                run_script("train", run_id, data_file_dir, test_file)
 
             # Predict with the trained models
             run_script("predict", run_id, data_file_dir, test_file)
