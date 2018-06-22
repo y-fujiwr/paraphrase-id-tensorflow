@@ -1,5 +1,6 @@
 import os
 import csv
+import math
 from subprocess import call
 from scripts.run_model.run_siamese import construct_paths
 
@@ -59,11 +60,13 @@ def main(threshold=0.5):
                         for row_orig, row_pred in zip(treader, preader):
                             ground_truth = float(row_orig[2])
                             predicted = float(row_pred[0])
-                            if ground_truth - predicted > threshold:
+                            new_row = row_orig + [predicted]
+                            if math.fabs(ground_truth - predicted) > threshold:
                                 # abnormal case
-                                awriter.writerow(row_orig.extend(row_pred))
+                                awriter.writerow(new_row)
                             else:
-                                bwriter.writewor(row_orig)
+                                # better train file
+                                bwriter.writerow(new_row)
 
             # Generate the new training set, split into (train, val).csv
 
