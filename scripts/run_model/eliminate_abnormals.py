@@ -47,8 +47,9 @@ def main(threshold=0.5):
             predictions_file_path = paths['predictions_file_path']
 
             current_main_file_path = os.path.join(data_file_dir, main_filename)
+            is_current_main_file_exist = os.path.exists(current_main_file_path)
             # Copy main.csv file from the previous run
-            if previous_better_main_file_path:
+            if previous_better_main_file_path and not is_current_main_file_exist:
                 print("Copying main file from previous run...")
                 copyfile(previous_better_main_file_path, current_main_file_path)
 
