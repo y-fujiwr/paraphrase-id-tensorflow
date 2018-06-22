@@ -53,7 +53,9 @@ def main(threshold=0.5):
                     with open(better_main_file_path, 'w') as bfile:
                         bwriter = csv.writer(bfile)
                         for row_orig, row_pred in zip(treader, preader):
-                            if row_orig[2] - row_pred[0] > threshold:
+                            ground_truth = float(row_orig[2])
+                            predicted = float(row_pred[0])
+                            if ground_truth - predicted > threshold:
                                 # abnormal case
                                 awriter.writerow(row_orig.extend(row_pred))
                             else:
