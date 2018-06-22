@@ -5,6 +5,7 @@ from scripts.run_model.run_siamese import construct_paths
 
 config_file_path = '../../config/01_bcb_clone_and_fp_balanced_all.yml'
 data_file_dir_template = '../../data/processed/bcb/clone_and_false_positives/balanced/all-balanced/{run_id}/'
+model_name = 'eliminate_abnormal'
 
 main_file = 'main.csv'
 test_file_path = main_file
@@ -30,7 +31,6 @@ def main(threshold=0.5):
             data_file_dir = data_file_dir_template.format(run_id=run_id)
             os.makedirs(data_file_dir, exist_ok=True)
 
-            model_name = 'eliminate-abnormal'
             paths = construct_paths(model_name, run_id, data_file_dir, test_file=test_file)
 
             # Train the model
@@ -71,6 +71,7 @@ def run_script(mode, run_id, data_file_dir, test_file):
     call(['python', 'run_siamese.py',
           mode,
           '--config_file={}'.format(config_file_path),
+          '--model_name={}'.format(model_name),
           '--run_id={}'.format(run_id),
           '--data_file_dir={}'.format(data_file_dir),
           '--test_file={}'.format(test_file),
