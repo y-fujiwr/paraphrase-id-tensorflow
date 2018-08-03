@@ -16,6 +16,8 @@ from duplicate_questions.data.instances.sts_instance import STSInstance
 from duplicate_questions.data.instances.code_instance import CodeInstance
 from duplicate_questions.models.siamese_bilstm.siamese_bilstm import SiameseBiLSTM
 
+from scripts.data.visualize_result import plot_pairs
+
 logger = logging.getLogger(__name__)
 
 
@@ -231,7 +233,7 @@ def main():
         # Predict with the model
         num_test_steps = int(math.ceil(test_data_size / batch_size))
         # Numpy array of shape (num_test_examples, 2)
-        raw_predictions = model.predict(get_test_instance_generator=test_data_gen,
+        raw_predictions, encodings = model.predict(get_test_instance_generator=test_data_gen,
                                         model_load_dir=model_save_dir,
                                         batch_size=batch_size,
                                         num_test_steps=num_test_steps)
@@ -256,7 +258,17 @@ def main():
         is_duplicate_df = pd.DataFrame(is_duplicate_probabilities)
         # is_duplicate_df.to_csv(predictions_file_path, index_label="test_id",
         #                        header=["is_duplicate"])
-        is_duplicate_df.to_csv(predictions_file_path, index=False, header=False)
+        # is_duplicate_df.to_csv(predictions_file_path, index=False, header=False)
+
+        encodings_df = pd.DataFrame(encodings)
+        pair_info_df = pd.read_csv(paths['test_file_path'], header=None)
+
+        # print(pair_info_df.shape, is_duplicate_df.shape, encodings_df.shape)
+
+        result = pd.DataFrame(np.hstack((pair_info_df, is_duplicate_df, encodings_df)))
+
+        result.to_csv(predictions_file_path, index=False, header=False)
+        plot_pairs(predictions_file_path)
 
 
 def construct_paths(model_name, run_id, data_file_dir, train_filename='train.csv',

@@ -35,6 +35,8 @@ class BaseTFModel:
 
         self.training_op = None
         self.summary_op = None
+        self.encoded_sentence_one = None
+        self.encoded_sentence_two = None
 
     def _create_placeholders(self):
         raise NotImplementedError
@@ -294,14 +296,18 @@ class BaseTFModel:
                 get_test_instance_generator, batch_size)
 
             y_pred = []
+            encodings = []
             for batch in tqdm(test_batch_gen,
                               total=num_test_steps,
                               desc="Test Batches Completed"):
                 feed_dict = self._get_test_feed_dict(batch)
-                y_pred_batch = sess.run(self.y_pred, feed_dict=feed_dict)
+                y_pred_batch, encode_one, encode_two = sess.run([self.y_pred, self.encoded_sentence_one,
+                                                                 self.encoded_sentence_two], feed_dict=feed_dict)
                 y_pred.append(y_pred_batch)
+                encodings.append(np.concatenate([encode_one, encode_two], axis=1))
             y_pred_flat = np.concatenate(y_pred, axis=0)
-        return y_pred_flat
+            encodings_flat = np.concatenate(encodings, axis=0)
+        return y_pred_flat, encodings_flat
 
     def _evaluate_on_validation(self, get_val_instance_generator,
                                 batch_size,

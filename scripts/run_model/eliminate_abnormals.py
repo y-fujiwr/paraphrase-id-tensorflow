@@ -86,7 +86,7 @@ def main(threshold=0.5):
             test_file_path = paths['test_file_path']
             better_main_file_path = os.path.join(data_file_dir, better_main_filename)
 
-            print("Removing abnormal files...")
+            print("Removing abnormal clone pairs...")
             with open(test_file_path) as tfile:
                 treader = csv.reader(tfile)
                 with open(predictions_file_path) as pfile:

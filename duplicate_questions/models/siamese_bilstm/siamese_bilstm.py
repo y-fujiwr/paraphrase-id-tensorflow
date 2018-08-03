@@ -1,3 +1,5 @@
+import csv
+import pandas as pd
 from copy import deepcopy
 import logging
 from overrides import overrides
@@ -11,6 +13,9 @@ from ...util.rnn import last_relevant_output
 
 logger = logging.getLogger(__name__)
 
+
+embedding_output_file = '/home/wuyuhao/PycharmProjects/paraphrase-id-tensorflow/data/processed/bcb' \
+                        '/clone_and_false_positives/balanced/all-balanced/proper-testing/embedding.csv'
 
 class SiameseBiLSTM(BaseTFModel):
     """
@@ -258,6 +263,9 @@ class SiameseBiLSTM(BaseTFModel):
                 raise ValueError("Got an unexpected value {} for "
                                  "rnn_output_mode, expected one of "
                                  "[mean_pool, last]")
+
+        self.encoded_sentence_one = encoded_sentence_one
+        self.encoded_sentence_two = encoded_sentence_two
 
         with tf.name_scope("loss"):
             # Use the exponential of the negative L1 distance
