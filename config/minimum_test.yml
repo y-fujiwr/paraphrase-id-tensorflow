@@ -1,0 +1,10 @@
+# A very small test case, to check whether the model can run without error
+
+run_id: 01
+model_name: "minimum_test"
+data_file_dir: ../../data/processed/bcb/testing/minimum/
+
+num_epochs: 2
+num_sentence_words: 100
+batch_size: 32
+rnn_hidden_size: 32

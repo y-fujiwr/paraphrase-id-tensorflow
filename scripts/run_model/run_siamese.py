@@ -26,7 +26,7 @@ def main():
     project_dir = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)
 
     # Parse config arguments
-    argparser = configargparse.ArgumentParser(
+    argparser = configargparse.ArgumentParser(default_config_files=['../../config/default.yml'],
         description=("Run a baseline Siamese BiLSTM model "
                      "for paraphrase identification."))
     argparser.add_argument("mode", type=str,
@@ -38,14 +38,6 @@ def main():
                                  "DataIndexer to load."))
     argparser.add_argument("--config_file", is_config_file_arg=True,
                            help="The path to a config file.")
-    # argparser.add_argument("--model_load_dir", type=str,
-    #                        help=("The path to a directory with checkpoints to "
-    #                              "load for evaluation or prediction. The "
-    #                              "latest checkpoint will be loaded."))
-    # argparser.add_argument("--dataindexer_load_path", type=str,
-    #                        help=("The path to the dataindexer fit on the "
-    #                              "train data, so we can properly index the "
-    #                              "test data for evaluation or prediction."))
     argparser.add_argument("--data_file_dir", type=str,
                            default=os.path.join(project_dir,
                                                 "data/processed/"),
@@ -72,18 +64,15 @@ def main():
                            help=("The maximum length of a sentence. Longer "
                                  "sentences will be truncated, and shorter "
                                  "ones will be padded."))
-    argparser.add_argument("--word_embedding_dim", type=int, default=8,
-                           help="Dimensionality of the word embedding layer")
-    # argparser.add_argument("--pretrained_embeddings_file_path", type=str,
-    #                        help="Path to a file with pretrained embeddings.",
-    #                        default=os.path.join(project_dir,
-    #                                             "data/external/",
-    #                                             "glove.6B.300d.txt"))
-    argparser.add_argument("--pretrained_embeddings_file_path", type=str,
+    argparser.add_argument("--embedding_file_path_template", type=str,
                            help="Path to a file with pretrained embeddings.",
                            default=os.path.join(project_dir,
                                                 "data/external/bcb",
-                                                "embeddings.txt"))
+                                                "{name}.{dim}d.txt"))
+    argparser.add_argument("--embedding_file_name", type=str,
+                           help="Name of the embedding file.")
+    argparser.add_argument("--word_embedding_dim", type=int, default=8,
+                           help="Dimensionality of the word embedding layer")
     argparser.add_argument("--fine_tune_embeddings", action="store_true",
                            help=("Whether to train the embedding layer "
                                  "(if True), or keep it fixed (False)."))
@@ -146,7 +135,8 @@ def main():
 
     paths = construct_paths(model_name, run_id, config.data_file_dir, config.train_filename,
                             config.val_filename, config.test_filename, config.model_save_root,
-                            config.log_dir)
+                            config.log_dir, config.embedding_file_path_template, config.embedding_file_name,
+                            config.word_embedding_dim)
     model_save_file_path = paths['model_save_file_path']
     model_save_dir = paths['model_save_dir']
     data_manager_pickle_file_path = paths['data_manager_pickle_file_path']
@@ -190,7 +180,7 @@ def main():
     embedding_manager = EmbeddingManager(data_manager.data_indexer)
     embedding_matrix = embedding_manager.get_embedding_matrix(
         config.word_embedding_dim,
-        config.pretrained_embeddings_file_path)
+        paths['embedding_file_path'])
     vars(config)["word_embedding_matrix"] = embedding_matrix
 
     # Initialize the model.
@@ -265,7 +255,8 @@ def main():
 
         # print(pair_info_df.shape, is_duplicate_df.shape, encodings_df.shape)
 
-        result = pd.DataFrame(np.hstack((pair_info_df, is_duplicate_df, encodings_df)))
+        # result = pd.DataFrame(np.hstack((pair_info_df, is_duplicate_df, encodings_df)))
+        result = pd.DataFrame(np.hstack((pair_info_df, is_duplicate_df)))
 
         result.to_csv(predictions_file_path, index=False, header=False)
         plot_pairs(predictions_file_path)
@@ -273,7 +264,8 @@ def main():
 
 def construct_paths(model_name, run_id, data_file_dir, train_filename='train.csv',
                     val_filename='val.csv', test_filename='test.csv', model_save_root='../../models/',
-                    log_dir='../../logs/'):
+                    log_dir='../../logs/', embedding_file_path_template='',
+                    embedding_filename='', embedding_size=8):
     model_save_dir = os.path.join(model_save_root, model_name, run_id + "/")
 
     data_manager_pickle_file_path = os.path.join(model_save_dir,
@@ -288,6 +280,10 @@ def construct_paths(model_name, run_id, data_file_dir, train_filename='train.csv
 
     predictions_file_path = test_file_path + ".output_predictions.csv"
     model_save_file_path = os.path.join(model_save_dir, model_name + "-" + run_id)
+
+    embedding_file_path = embedding_file_path_template.format(name=embedding_filename,
+                                                              dim=embedding_size)
+
     paths = {
         "model_save_dir": model_save_dir,
         "data_manager_pickle_file_path": data_manager_pickle_file_path,
@@ -297,6 +293,7 @@ def construct_paths(model_name, run_id, data_file_dir, train_filename='train.csv
         "predictions_file_path": predictions_file_path,
         "model_save_file_path": model_save_file_path,
         "log_file_path": log_file_path,
+        "embedding_file_path": embedding_file_path,
     }
     return paths
 
