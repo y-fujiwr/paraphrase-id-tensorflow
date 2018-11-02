@@ -111,6 +111,10 @@ def main():
                            default=os.path.join(project_dir,
                                                 "models/"),
                            help=("Directory to save model checkpoints to."))
+    argparser.add_argument("--token_file_dir", type=str,
+                           help=("Directory to token files."))
+    argparser.add_argument("--token_file_ext", type=str,
+                           help=("File extentions of token files."))
     argparser.add_argument("--run_id", type=str, default=default_run_id,
                            help=("Identifying run ID for this run. If "
                                  "predicting, you probably want this "
@@ -146,6 +150,7 @@ def main():
 
         # TODO: determine from config
         # data_manager = DataManager(STSInstance)
+        CodeInstance.set_token_file(config.token_file_dir, config.token_file_ext)
         data_manager = DataManager(CodeInstance)
         num_sentence_words = config.num_sentence_words
         get_train_data_gen, train_data_size = data_manager.get_train_data_from_file(

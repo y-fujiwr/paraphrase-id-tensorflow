@@ -24,3 +24,5 @@ fine_tune_embeddings: false
 log_period: 10
 rnn_output_mode: last
 num_sentence_words: 300
+token_file_dir: /home/wuyuhao/dataset/bigclonebench/files/dataset/merged_functions/
+token_file_ext: .java.java.2_0_0_0.default.ccfxprep

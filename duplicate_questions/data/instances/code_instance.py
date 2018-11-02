@@ -11,10 +11,6 @@ from .instance_word import IndexedInstanceWord
 import logging
 logger = logging.getLogger(__name__)
 
-# token_file_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), r"..\..\..\data\external\bcb\functions\\")
-token_file_dir = '/home/wuyuhao/dataset/bigclonebench/files/dataset/merged_functions/'
-# token_file_dir = '/home/wuyuhao/dataset/bigclonebench/files/dataset/test/'
-file_ext = '.java.java.2_0_0_0.default.ccfxprep'
 
 class CodeInstance(TextInstance):
     """
@@ -39,6 +35,8 @@ class CodeInstance(TextInstance):
     """
 
     label_mapping = {0: [1, 0], 1: [0, 1], None: None}
+    token_file_dir = ''
+    token_file_ext = ''
 
     def __init__(self, first_sentence, second_sentence, label):
         super(CodeInstance, self).__init__(label)
@@ -97,15 +95,21 @@ class CodeInstance(TextInstance):
                                    self.label_mapping[self.label])
                                    # [self.label])
 
-    @staticmethod
-    def read_tokens(func_id):
+
+    @classmethod
+    def set_token_file(cls, path, ext):
+        cls.token_file_dir = path
+        cls.token_file_ext = ext
+
+    @classmethod
+    def read_tokens(cls, func_id):
         func_id = str(func_id)
         if len(func_id) < 1:
             return []
 
         # sub_dir = func_id[0]
         sub_dir = ""
-        file_path = os.path.join(token_file_dir, sub_dir, func_id + file_ext)
+        file_path = os.path.join(cls.token_file_dir, sub_dir, func_id + cls.token_file_ext)
 
         tokens = ""
         if os.path.exists(file_path):
