@@ -59,23 +59,43 @@ pip install tensorflow-gpu
 
 ## Getting / Processing The Data
 
-Download the data file:
-https://drive.google.com/file/d/1PqZkAPrBH6ZEPww6WOnZUxF55G83eeZH/view?usp=sharing
+### Data files
+
+Download the data files:
+https://drive.google.com/open?id=1l1FW4-nQAscxG9jBpPNDdG6YU96MuW5U
 
 Unzip it to the root of the project.
+
+### Function snippets
+
+Download the function snippets: 
+https://drive.google.com/open?id=1Of-jhkVTFtOBrTEie7UCR-sSBpgXwNZh
+
+Unzip it under the `data/external/` directory, which is created from the previous step. 
+
+
+Now the directory should look like this:
+
+    ├── data
+    │   ├── external
+    │   │   ├── bcb
+    │   │   └── function_snippets
+    │   └── processed
+    │       └── bcb
+
 
 ## Running models
 
 Run the following command to train the model.
 
 ```
-python scripts/run_model/run_siamese.py train --config_file=../../config/02_bcb_strong.json
+python scripts/run_model/run_siamese.py train --config_file=../../config/minimum_test.yml
 ```
 
 Run the following command to perform the prediction.
 
 ```
-python scripts/run_model/run_siamese.py predict --config_file=../../config/02_bcb_strong.json
+python scripts/run_model/run_siamese.py predict --config_file=../../config/minimum_test.yml
 ```
 
 ## Contributors

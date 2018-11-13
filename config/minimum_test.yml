@@ -1,7 +1,7 @@
 # A very small test case, to check whether the model can run without error
 
 run_id: 01
-model_name: "minimum_test"
+model_name: minimum_test
 data_file_dir: ../../data/processed/bcb/testing/minimum/
 
 num_epochs: 2
