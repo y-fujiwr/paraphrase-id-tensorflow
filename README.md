@@ -77,11 +77,11 @@ Unzip it under the `data/external/` directory, which is created from the previou
 Now the directory should look like this:
 
     ├── data
-    │   ├── external
-    │   │   ├── bcb
+    │?? ├── external
+    │?? │   ├── bcb
     │   │   └── function_snippets
-    │   └── processed
-    │       └── bcb
+    │?? └── processed
+    │ ??    └── bcb
 
 
 ## Running models
@@ -89,13 +89,15 @@ Now the directory should look like this:
 Run the following command to train the model.
 
 ```
-python scripts/run_model/run_siamese.py train --config_file=../../config/minimum_test.yml
+cd scripts/run_model
+python run_siamese.py train --config_file=../../config/minimum_test.yml
 ```
 
 Run the following command to perform the prediction.
 
 ```
-python scripts/run_model/run_siamese.py predict --config_file=../../config/minimum_test.yml
+cd scripts/run_model
+python run_siamese.py predict --config_file=../../config/minimum_test.yml
 ```
 
 ## Contributors
@@ -115,10 +117,10 @@ issues and look at pull requests.
     ├── Makefile           <- Makefile with commands like `make data` or `make train`
     ├── README.md          <- The top-level README for developers using this project.
     ├── data
-    │   ├── external       <- Data from third party sources.
-    │   ├── interim        <- Intermediate data that has been transformed.
-    │   ├── processed      <- The final, canonical data sets for modeling.
-    │   └── raw            <- Original immutable data (e.g. Quora Question Pairs).
+    │?? ├── external       <- Data from third party sources.
+    │?? ├── interim        <- Intermediate data that has been transformed.
+    │?? ├── processed      <- The final, canonical data sets for modeling.
+    │?? └── raw            <- Original immutable data (e.g. Quora Question Pairs).
     |
     ├── logs               <- Logs from training or prediction, including TF model summaries.
     │
@@ -127,15 +129,15 @@ issues and look at pull requests.
     ├── requirements.txt   <- The requirements file for reproducing the analysis environment
     │
     ├── duplicate_questions<- Module with source code for models and data.
-    │   ├── data           <- Methods and classes for manipulating data.
+    │?? ├── data           <- Methods and classes for manipulating data.
     │   │
-    │   ├── models         <- Methods and classes for training models.
+    │?? ├── models         <- Methods and classes for training models.
     │   │
-    │   └── util           <- Various helper methods and classes for use in models.
+    │?? └── util           <- Various helper methods and classes for use in models.
     │
     ├── scripts            <- Scripts for generating the data
-    │   ├── data           <- Scripts to clean and split data
+    │?? ├── data           <- Scripts to clean and split data
     │   │
-    │   └── run_model      <- Scripts to train and predict with models.
+    │?? └── run_model      <- Scripts to train and predict with models.
     │
     └── tests              <- Directory with unit tests.
