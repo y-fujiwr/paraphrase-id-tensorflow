@@ -163,6 +163,8 @@ def main():
         logger.info("Loading pickled DataManager "
                     "from {}".format(data_manager_pickle_file_path))
         data_manager = pickle.load(open(data_manager_pickle_file_path, "rb"))
+        data_manager.instance_type.token_file_ext = config.token_file_ext
+        data_manager.instance_type.token_file_dir = config.token_file_dir
         test_data_gen, test_data_size = data_manager.get_test_data_from_file(
             [paths['test_file_path']])
 
@@ -256,6 +258,7 @@ def main():
         # is_duplicate_df.to_csv(predictions_file_path, index=False, header=False)
 
         encodings_df = pd.DataFrame(encodings)
+        print(encodings_df)
         pair_info_df = pd.read_csv(paths['test_file_path'], header=None)
 
         # print(pair_info_df.shape, is_duplicate_df.shape, encodings_df.shape)

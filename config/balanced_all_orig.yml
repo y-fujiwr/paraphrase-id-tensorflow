@@ -1,0 +1,28 @@
+# This file is the start point for configuration
+
+run_id: 01
+model_name: default
+data_file_dir: ../../data/processed/bcb/clone_and_false_positives/balanced/all-balanced/30
+train_filename: train.csv.orig
+val_filename: val.csv.orig
+test_filename: test.csv.orig
+model_save_root: ../../models/
+batch_size: 128
+early_stopping_patience: 10
+log_dir: ../../logs/
+embedding_file_path_template: ../../data/external/bcb/{name}.{dim}d.txt
+embedding_file_name: embeddings
+word_embedding_dim: 8
+reweight_predictions_for_kaggle: false
+save_period: 250
+rnn_hidden_size: 256
+share_encoder_weights: true
+num_epochs: 8
+output_keep_prob: 1
+val_period: 250
+fine_tune_embeddings: false
+log_period: 10
+rnn_output_mode: last
+num_sentence_words: 300
+token_file_dir: ../../data/external/function_snippets/
+token_file_ext: .java.java.2_0_0_0.default.ccfxprep

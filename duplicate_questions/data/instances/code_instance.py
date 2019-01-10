@@ -110,7 +110,6 @@ class CodeInstance(TextInstance):
         # sub_dir = func_id[0]
         sub_dir = ""
         file_path = os.path.join(cls.token_file_dir, sub_dir, func_id + cls.token_file_ext)
-
         tokens = ""
         if os.path.exists(file_path):
             with open(file_path) as f:

@@ -9,7 +9,7 @@ model_save_root: ../../models/
 batch_size: 128
 early_stopping_patience: 10
 log_dir: ../../logs/
-pretrained_embeddings_file_path: ../../data/external/bcb/embeddings.8d.txt
+embedding_file_name: embeddings
 reweight_predictions_for_kaggle: false
 save_period: 250
 rnn_hidden_size: 256
