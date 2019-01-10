@@ -258,7 +258,6 @@ def main():
         # is_duplicate_df.to_csv(predictions_file_path, index=False, header=False)
 
         encodings_df = pd.DataFrame(encodings)
-        print(encodings_df)
         pair_info_df = pd.read_csv(paths['test_file_path'], header=None)
 
         # print(pair_info_df.shape, is_duplicate_df.shape, encodings_df.shape)
