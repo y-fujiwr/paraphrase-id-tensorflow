@@ -12,7 +12,9 @@ def check(file_path):
     fp = result[((result["rabel"] - 0.5 ) * (result["prediction"] - 0.5) < 0) & (result["rabel"] == 0)]
     fn = result[((result["rabel"] - 0.5 ) * (result["prediction"] - 0.5) < 0) & (result["rabel"] == 1)]
     fp.to_csv(Path(Path(file_path).parent, "fp_data.csv"),index=False)
+    fp["id1"].append(fp["id2"]).value_counts().to_csv(Path(Path(file_path).parent, "fp_count.csv"))
     fn.to_csv(Path(Path(file_path).parent, "fn_data.csv"),index=False)
+    fn["id1"].append(fn["id2"]).value_counts().to_csv(Path(Path(file_path).parent, "fn_count.csv"))
     fp["pair"] = "(" + fp["func_1"].astype(str) + "," + fp["func_2"].astype(str) + ")"
     fn["pair"] = "(" + fn["func_1"].astype(str) + "," + fn["func_2"].astype(str) + ")"
     fp_metrics = fp["pair"].value_counts()
