@@ -6,8 +6,8 @@ method_name = ["println\n","write\n","close\n","append\n","add\n","getChannel\n"
 "getInstance\n","put\n","URL\n","getMessage\n","openConnection\n","digest\n","assertEquals\n","debug\n","substring\n"]
 
 def extract(path):
-    target = open(path, "r").readlines()
-    output = open(path.with_suffix(""), "w")
+    target = open(str(path), "r").readlines()
+    output = open(str(path.with_suffix("")), "w")
     for i in range(len(target)):
         string = target[i].split("\t")[2]
         if "&" in string:
