@@ -14,7 +14,7 @@ from duplicate_questions.data.data_manager import DataManager
 from duplicate_questions.data.embedding_manager import EmbeddingManager
 from duplicate_questions.data.instances.sts_instance import STSInstance
 from duplicate_questions.data.instances.code_instance import CodeInstance
-from duplicate_questions.models.siamese_bilstm.siamese_bilstm import SiameseBiLSTM
+from duplicate_questions.models.siamese_bilstm.siamese_matching_bilstm import SiameseMatchingBiLSTM
 
 from scripts.data.visualize_result import plot_pairs
 
