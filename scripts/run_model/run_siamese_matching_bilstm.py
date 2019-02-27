@@ -230,7 +230,7 @@ def main():
         # Predict with the model
         num_test_steps = int(math.ceil(test_data_size / batch_size))
         # Numpy array of shape (num_test_examples, 2)
-        raw_predictions, encodings = model.predict(get_test_instance_generator=test_data_gen,
+        raw_predictions, _ = model.predict(get_test_instance_generator=test_data_gen,
                                         model_load_dir=model_save_dir,
                                         batch_size=batch_size,
                                         num_test_steps=num_test_steps)
@@ -257,7 +257,6 @@ def main():
         #                        header=["is_duplicate"])
         # is_duplicate_df.to_csv(predictions_file_path, index=False, header=False)
 
-        encodings_df = pd.DataFrame(encodings)
         pair_info_df = pd.read_csv(paths['test_file_path'], header=None)
 
         # print(pair_info_df.shape, is_duplicate_df.shape, encodings_df.shape)

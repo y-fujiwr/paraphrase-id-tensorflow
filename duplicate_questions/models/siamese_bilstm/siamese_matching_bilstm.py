@@ -234,6 +234,9 @@ class SiameseMatchingBiLSTM(BaseTFModel):
             encoded_sentence_two = tf.concat([pooled_fw_output_two,
                                               pooled_bw_output_two], 1)
 
+        self.encoded_sentence_one = encoded_sentence_one
+        self.encoded_sentence_two = encoded_sentence_two
+
         # Sentence matching layer
         with tf.name_scope("match_sentences"):
             sentence_difference = encoded_sentence_one - encoded_sentence_two
