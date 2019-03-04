@@ -16,6 +16,9 @@ from duplicate_questions.data.instances.sts_instance import STSInstance
 from duplicate_questions.data.instances.code_instance import CodeInstance
 from duplicate_questions.models.siamese_bilstm.siamese_matching_bilstm import SiameseMatchingBiLSTM
 
+sys.path.append(os.path.join(os.path.dirname(__file__), "../data/"))
+from functionality import check
+
 from scripts.data.visualize_result import plot_pairs
 
 logger = logging.getLogger(__name__)
@@ -265,6 +268,7 @@ def main():
         result = pd.DataFrame(np.hstack((pair_info_df, is_duplicate_df)))
 
         result.to_csv(predictions_file_path, index=False, header=False)
+        check(predictions_file_path)
         plot_pairs(predictions_file_path)
 
 
