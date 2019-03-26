@@ -7,6 +7,7 @@ from tensorflow.contrib.rnn import LSTMCell
 from ..base_tf_model import BaseTFModel
 from ...util.switchable_dropout_wrapper import SwitchableDropoutWrapper
 from ...util.pooling import mean_pool
+from .attention import attention
 
 logger = logging.getLogger(__name__)
 
@@ -234,16 +235,21 @@ class SiameseMatchingBiLSTM(BaseTFModel):
             encoded_sentence_two = tf.concat([pooled_fw_output_two,
                                               pooled_bw_output_two], 1)
 
-        self.encoded_sentence_one = encoded_sentence_one
-        self.encoded_sentence_two = encoded_sentence_two
+        #self.encoded_sentence_one = encoded_sentence_one
+        #self.encoded_sentence_two = encoded_sentence_two
 
         # Sentence matching layer
         with tf.name_scope("match_sentences"):
+            """
             sentence_difference = encoded_sentence_one - encoded_sentence_two
             sentence_product = encoded_sentence_one * encoded_sentence_two
             # Shape: (batch_size, 4 * 2*rnn_hidden_size)
             matching_vector = tf.concat([encoded_sentence_one, sentence_product,
                                          sentence_difference, encoded_sentence_two], 1)
+            """
+            attention_output_one = attention((fw_output_one, bw_output_one), 300)
+            attention_output_two = attention((fw_output_two, bw_output_two), 300)
+            matching_vector = tf.concat([attention_output_one, attention_output_two], 1)
         # Nonlinear projection to 2 dimensional class probabilities
         with tf.variable_scope("project_matching_vector"):
             # Shape: (batch_size, 2)
