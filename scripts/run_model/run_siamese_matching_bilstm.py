@@ -233,13 +233,13 @@ def main():
         # Predict with the model
         num_test_steps = int(math.ceil(test_data_size / batch_size))
         # Numpy array of shape (num_test_examples, 2)
-        raw_predictions, _ = model.predict(get_test_instance_generator=test_data_gen,
+        raw_predictions = model.predict(get_test_instance_generator=test_data_gen,
                                         model_load_dir=model_save_dir,
                                         batch_size=batch_size,
                                         num_test_steps=num_test_steps)
         # Remove the first column, so we're left with just the probabilities
         # that a question is a duplicate.
-        is_duplicate_probabilities = np.delete(raw_predictions, 0, 1)
+        is_duplicate_probabilities = np.delete(raw_predictions[0], 0, 1)
 
         # The class balance between kaggle train and test seems different.
         # This edits prediction probability to account for the discrepancy.
@@ -255,6 +255,7 @@ def main():
         # Write the predictions to an output submission file
         predictions_file_path = paths['predictions_file_path']
         logger.info("Writing predictions to {}".format(predictions_file_path))
+        
         is_duplicate_df = pd.DataFrame(is_duplicate_probabilities)
         # is_duplicate_df.to_csv(predictions_file_path, index_label="test_id",
         #                        header=["is_duplicate"])
@@ -263,7 +264,6 @@ def main():
         pair_info_df = pd.read_csv(paths['test_file_path'], header=None)
 
         # print(pair_info_df.shape, is_duplicate_df.shape, encodings_df.shape)
-
         # result = pd.DataFrame(np.hstack((pair_info_df, is_duplicate_df, encodings_df)))
         result = pd.DataFrame(np.hstack((pair_info_df, is_duplicate_df)))
 
