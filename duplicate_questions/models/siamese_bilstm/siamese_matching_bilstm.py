@@ -8,6 +8,9 @@ from ..base_tf_model import BaseTFModel
 from ...util.switchable_dropout_wrapper import SwitchableDropoutWrapper
 from ...util.pooling import mean_pool
 from .attention import attention
+from ...data.data_manager import DataManager
+from tqdm import tqdm
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -315,3 +318,58 @@ class SiameseMatchingBiLSTM(BaseTFModel):
                      self.sentence_two: inputs[1],
                      self.is_train: False}
         return feed_dict
+
+    def predict(self, get_test_instance_generator, model_load_dir, batch_size,
+                num_test_steps=None):
+        """
+        Load a serialized model and use it for prediction on a test
+        set (from a finite generator).
+
+        Parameters
+        ----------
+        get_test_instance_generator: Function returning generator
+            This function should return a finite generator that produces instances
+            for use in training.
+
+        model_load_dir: str
+            Path to a directory with serialized tensorflow checkpoints for the
+            model to be run. The most recent checkpoint will be loaded and used
+            for prediction.
+
+        batch_size: int
+            The number of instances per batch produced by the generator.
+
+        num_test_steps: int
+            The number of steps (calculated by ceil(total # test examples / batch_size))
+            in testing. This does not have any effect on how much of the test data
+            is read; inference keeps going until the generator is exhausted. It
+            is used to set a total for the progress bar.
+        """
+        if num_test_steps is None:
+            logger.info("num_test_steps is not set, pass in a value "
+                        "to show a progress bar.")
+
+        gpu_options = tf.GPUOptions(allow_growth=True)
+        sess_config = tf.ConfigProto(gpu_options=gpu_options)
+        with tf.Session(config=sess_config) as sess:
+            saver = tf.train.Saver()
+            logger.info("Getting latest checkpoint in {}".format(model_load_dir))
+            last_checkpoint = tf.train.latest_checkpoint(model_load_dir)
+            logger.info("Attempting to load checkpoint at {}".format(last_checkpoint))
+            saver.restore(sess, last_checkpoint)
+            logger.info("Successfully loaded {}!".format(last_checkpoint))
+
+            # Get a generator of test batches
+            test_batch_gen = DataManager.get_batch_generator(
+                get_test_instance_generator, batch_size)
+
+            y_pred = []
+            encodings = []
+            for batch in tqdm(test_batch_gen,
+                              total=num_test_steps,
+                              desc="Test Batches Completed"):
+                feed_dict = self._get_test_feed_dict(batch)
+                y_pred_batch = sess.run([self.y_pred], feed_dict=feed_dict)
+                y_pred.append(y_pred_batch)
+            y_pred_flat = np.concatenate(y_pred, axis=0)
+        return y_pred_flat, y_pred_flat
